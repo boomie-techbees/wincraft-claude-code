@@ -19,7 +19,7 @@ window.WinCraft.Auth = (() => {
       if (user) {
         onAuthenticated(user);
       } else {
-        setTimeout(() => netlifyIdentity.open('login'), 0);
+        setTimeout(() => netlifyIdentity.open('signup'), 0);
       }
     });
 
