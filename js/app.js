@@ -27,6 +27,10 @@ window.WinCraft.App = (() => {
 
   function showApp() {
     document.getElementById('app-nav').style.visibility = '';
+    // Strip OAuth tokens from the URL (e.g. #access_token=... after Google login).
+    if (location.hash.startsWith('#access_token') || location.hash.startsWith('#error')) {
+      history.replaceState(null, '', location.pathname);
+    }
     if (!location.hash) {
       location.hash = '#/entry';
       return;
