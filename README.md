@@ -4,7 +4,7 @@
 
 WinCraft is a personal achievement tracker that helps you record your wins, generate AI-powered summaries, and turn your accomplishments into polished resume bullets.
 
-🌐 **Live site:** https://gleeful-puffpuff-8beac5.netlify.app
+🌐 **Live site:** https://techbees.me/wincraft-app
 
 ---
 
