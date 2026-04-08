@@ -20,7 +20,14 @@ function checkRateLimit(ip) {
   return true;
 }
 
-export default async (req) => {
+export default async (req, context) => {
+  if (!context.clientContext?.user) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   if (req.method !== 'POST') {
     return new Response('Method not allowed', { status: 405 });
   }

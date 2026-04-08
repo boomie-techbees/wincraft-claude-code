@@ -71,7 +71,7 @@ window.WinCraft.EntryPage = (() => {
       }
     });
 
-    btnSave.addEventListener('click', () => {
+    btnSave.addEventListener('click', async () => {
       const text = textarea.value.trim();
       if (!text) {
         WinCraft.Toast.show('Write something first!', 'error');
@@ -83,12 +83,21 @@ window.WinCraft.EntryPage = (() => {
         .map(t => t.trim())
         .filter(Boolean);
 
-      WinCraft.Store.addWin(text, tags);
-      WinCraft.Toast.show('Win saved!', 'success');
+      btnSave.disabled = true;
+      btnSave.innerHTML = '<span class="spinner spinner-white"></span> Saving...';
 
-      textarea.value = '';
-      tagsInput.value = '';
-      suggestionsArea.innerHTML = '';
+      try {
+        await WinCraft.Store.addWin(text, tags);
+        WinCraft.Toast.show('Win saved!', 'success');
+        textarea.value = '';
+        tagsInput.value = '';
+        suggestionsArea.innerHTML = '';
+      } catch (err) {
+        WinCraft.Toast.show('Could not save win. Please try again.', 'error');
+      } finally {
+        btnSave.disabled = false;
+        btnSave.innerHTML = 'Save My Win!';
+      }
     });
   }
 

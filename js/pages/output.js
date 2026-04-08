@@ -5,9 +5,11 @@ window.WinCraft.OutputPage = (() => {
   let summaryCache = { hash: null, html: '' };
   let resumeCache = { hash: null, html: '' };
 
-  function render(container) {
-    const wins = WinCraft.Store.getWins();
+  function _winsHash(wins) {
+    return wins.length + ':' + (wins[0]?.id || '');
+  }
 
+  async function render(container) {
     container.innerHTML = `
       <div class="page">
         <div class="output-tabs">
@@ -15,7 +17,7 @@ window.WinCraft.OutputPage = (() => {
           <button class="output-tab ${currentTab === 'summary' ? 'active' : ''}" data-tab="summary">AI Summary</button>
           <button class="output-tab ${currentTab === 'resume' ? 'active' : ''}" data-tab="resume">Resume</button>
         </div>
-        <div id="output-content"></div>
+        <div id="output-content"><div class="ai-content text-center"><span class="spinner"></span></div></div>
       </div>
     `;
 
@@ -25,6 +27,16 @@ window.WinCraft.OutputPage = (() => {
         render(container);
       });
     });
+
+    let wins;
+    try {
+      wins = await WinCraft.Store.getWins();
+    } catch (err) {
+      document.getElementById('output-content').innerHTML = `
+        <div class="ai-content"><p>Could not load wins. Please try again.</p></div>
+      `;
+      return;
+    }
 
     const content = document.getElementById('output-content');
 
@@ -51,10 +63,14 @@ window.WinCraft.OutputPage = (() => {
 
     content.innerHTML = '';
     wins.forEach(win => {
-      const card = WinCraft.WinCard.render(win, (id) => {
-        WinCraft.Store.deleteWin(id);
-        WinCraft.Toast.show('Win deleted', 'default');
-        render(pageContainer);
+      const card = WinCraft.WinCard.render(win, async (id) => {
+        try {
+          await WinCraft.Store.deleteWin(id);
+          WinCraft.Toast.show('Win deleted', 'default');
+          render(pageContainer);
+        } catch (err) {
+          WinCraft.Toast.show('Could not delete win. Please try again.', 'error');
+        }
       });
       content.appendChild(card);
     });
@@ -72,7 +88,7 @@ window.WinCraft.OutputPage = (() => {
       return;
     }
 
-    const hash = WinCraft.Store.getWinsHash();
+    const hash = _winsHash(wins);
     if (summaryCache.hash === hash) {
       content.innerHTML = summaryCache.html;
       return;
@@ -116,7 +132,7 @@ window.WinCraft.OutputPage = (() => {
       return;
     }
 
-    const hash = WinCraft.Store.getWinsHash();
+    const hash = _winsHash(wins);
     if (resumeCache.hash === hash) {
       content.innerHTML = resumeCache.html;
       attachCopyHandler(content, wins);

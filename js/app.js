@@ -20,15 +20,38 @@ window.WinCraft.App = (() => {
     routes[page]();
   }
 
-  function init() {
+  function showAuthLoading() {
+    mount().innerHTML = '<div class="auth-loading"><span class="spinner"></span></div>';
+    document.getElementById('app-nav').style.visibility = 'hidden';
+  }
+
+  function showApp() {
+    document.getElementById('app-nav').style.visibility = '';
     if (!location.hash) {
       location.hash = '#/entry';
-      return; // hashchange will fire and call navigate
+      return;
     }
     navigate();
   }
 
-  window.addEventListener('hashchange', navigate);
+  async function onAuthenticated() {
+    // Migrate any pre-auth LocalStorage wins on first login.
+    const migrated = await WinCraft.Store.migrateLegacyWins();
+    if (migrated > 0) {
+      WinCraft.Toast.show(`Migrated ${migrated} existing win${migrated === 1 ? '' : 's'} to your account!`, 'success');
+    }
+    showApp();
+  }
+
+  function init() {
+    showAuthLoading();
+    WinCraft.Auth.init(onAuthenticated);
+  }
+
+  window.addEventListener('hashchange', () => {
+    if (WinCraft.Auth.getCurrentUser()) navigate();
+  });
+
   window.addEventListener('DOMContentLoaded', init);
 
   return { navigate };

@@ -1,8 +1,8 @@
 window.WinCraft = window.WinCraft || {};
 
 window.WinCraft.Store = (() => {
-  const WINS_KEY = 'wincraft_wins';
   const SETTINGS_KEY = 'wincraft_settings';
+  const LEGACY_WINS_KEY = 'wincraft_wins';
 
   function _read(key, fallback) {
     try {
@@ -17,36 +17,42 @@ window.WinCraft.Store = (() => {
     localStorage.setItem(key, JSON.stringify(value));
   }
 
-  // --- Wins ---
+  // --- Wins (async, backed by API) ---
 
   function getWins() {
-    return _read(WINS_KEY, []);
+    return WinCraft.API.getWins();
   }
 
   function addWin(text, tags) {
-    const wins = getWins();
-    const win = {
-      id: crypto.randomUUID(),
-      text: text.trim(),
-      date: new Date().toISOString(),
-      tags: (tags || []).map(t => t.trim()).filter(Boolean),
-    };
-    wins.unshift(win);
-    _write(WINS_KEY, wins);
-    return win;
+    return WinCraft.API.addWin(text, tags);
   }
 
   function deleteWin(id) {
-    const wins = getWins().filter(w => w.id !== id);
-    _write(WINS_KEY, wins);
+    return WinCraft.API.deleteWin(id);
   }
 
-  function getWinsHash() {
-    const wins = getWins();
-    return wins.length + ':' + (wins[0]?.id || '');
+  // Migrate any wins stored in LocalStorage from before auth was added.
+  // Calls the API to import them, then clears the legacy key.
+  async function migrateLegacyWins() {
+    const legacy = _read(LEGACY_WINS_KEY, []);
+    if (legacy.length === 0) return 0;
+
+    // Add in reverse order so the most recent ends up first in Blobs.
+    let migrated = 0;
+    for (const win of [...legacy].reverse()) {
+      try {
+        await WinCraft.API.addWin(win.text, win.tags || []);
+        migrated++;
+      } catch {
+        // Best-effort; skip individual failures.
+      }
+    }
+
+    localStorage.removeItem(LEGACY_WINS_KEY);
+    return migrated;
   }
 
-  // --- Settings ---
+  // --- Settings (local, not sensitive) ---
 
   function getSettings() {
     return _read(SETTINGS_KEY, { userName: '' });
@@ -56,5 +62,5 @@ window.WinCraft.Store = (() => {
     _write(SETTINGS_KEY, settings);
   }
 
-  return { getWins, addWin, deleteWin, getWinsHash, getSettings, saveSettings };
+  return { getWins, addWin, deleteWin, migrateLegacyWins, getSettings, saveSettings };
 })();
