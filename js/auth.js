@@ -32,7 +32,9 @@ window.WinCraft.Auth = (() => {
       location.reload();
     });
 
-    netlifyIdentity.init();
+    netlifyIdentity.init({
+      APIUrl: 'https://gleeful-puffpuff-8beac5.netlify.app/.netlify/identity',
+    });
   }
 
   return { init, getToken, getCurrentUser, logout };
