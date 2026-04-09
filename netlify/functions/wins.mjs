@@ -104,6 +104,47 @@ export default async (req, context) => {
     }
   }
 
+  if (req.method === 'PATCH') {
+    try {
+      const { id, archived } = await req.json();
+      if (!id || typeof id !== 'string') {
+        return new Response(JSON.stringify({ error: 'Invalid win ID.' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      if (typeof archived !== 'boolean') {
+        return new Response(JSON.stringify({ error: 'archived must be a boolean.' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      const wins = (await store.get(userId, { type: 'json' })) || [];
+      const win = wins.find(w => w.id === id);
+      if (!win) {
+        return new Response(JSON.stringify({ error: 'Win not found.' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      win.archived = archived;
+      await store.setJSON(userId, wins);
+
+      return new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch (err) {
+      console.error('wins PATCH error:', err);
+      return new Response(JSON.stringify({ error: 'Failed to update win' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
   if (req.method === 'DELETE') {
     try {
       const { id } = await req.json();

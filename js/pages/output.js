@@ -14,6 +14,7 @@ window.WinCraft.OutputPage = (() => {
       <div class="page">
         <div class="output-tabs">
           <button class="output-tab ${currentTab === 'list' ? 'active' : ''}" data-tab="list">All Wins</button>
+          <button class="output-tab ${currentTab === 'archived' ? 'active' : ''}" data-tab="archived">Archived</button>
           <button class="output-tab ${currentTab === 'summary' ? 'active' : ''}" data-tab="summary">AI Summary</button>
           <button class="output-tab ${currentTab === 'resume' ? 'active' : ''}" data-tab="resume">Resume</button>
         </div>
@@ -39,13 +40,17 @@ window.WinCraft.OutputPage = (() => {
     }
 
     const content = document.getElementById('output-content');
+    const activeWins = wins.filter(w => !w.archived);
+    const archivedWins = wins.filter(w => w.archived);
 
     if (currentTab === 'list') {
-      renderList(content, wins, container);
+      renderList(content, activeWins, container);
+    } else if (currentTab === 'archived') {
+      renderArchived(content, archivedWins, container);
     } else if (currentTab === 'summary') {
-      renderSummary(content, wins);
+      renderSummary(content, activeWins);
     } else if (currentTab === 'resume') {
-      renderResume(content, wins);
+      renderResume(content, activeWins);
     }
   }
 
@@ -63,14 +68,54 @@ window.WinCraft.OutputPage = (() => {
 
     content.innerHTML = '';
     wins.forEach(win => {
-      const card = WinCraft.WinCard.render(win, async (id) => {
-        try {
-          await WinCraft.Store.deleteWin(id);
-          WinCraft.Toast.show('Win deleted', 'default');
-          render(pageContainer);
-        } catch (err) {
-          WinCraft.Toast.show('Could not delete win. Please try again.', 'error');
-        }
+      const card = WinCraft.WinCard.render(win, {
+        onArchive: async (id) => {
+          try {
+            await WinCraft.Store.archiveWin(id);
+            WinCraft.Toast.show('Win archived', 'default');
+            render(pageContainer);
+          } catch (err) {
+            WinCraft.Toast.show('Could not archive win. Please try again.', 'error');
+          }
+        },
+      });
+      content.appendChild(card);
+    });
+  }
+
+  function renderArchived(content, wins, pageContainer) {
+    if (wins.length === 0) {
+      content.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">&#128193;</div>
+          <h3>No archived wins</h3>
+          <p>Archived wins will appear here.</p>
+        </div>
+      `;
+      return;
+    }
+
+    content.innerHTML = '';
+    wins.forEach(win => {
+      const card = WinCraft.WinCard.render(win, {
+        onRestore: async (id) => {
+          try {
+            await WinCraft.Store.unarchiveWin(id);
+            WinCraft.Toast.show('Win restored', 'success');
+            render(pageContainer);
+          } catch (err) {
+            WinCraft.Toast.show('Could not restore win. Please try again.', 'error');
+          }
+        },
+        onDelete: async (id) => {
+          try {
+            await WinCraft.Store.deleteWin(id);
+            WinCraft.Toast.show('Win permanently deleted', 'default');
+            render(pageContainer);
+          } catch (err) {
+            WinCraft.Toast.show('Could not delete win. Please try again.', 'error');
+          }
+        },
       });
       content.appendChild(card);
     });
