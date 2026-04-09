@@ -93,7 +93,7 @@ window.WinCraft.EntryPage = (() => {
         tagsInput.value = '';
         suggestionsArea.innerHTML = '';
       } catch (err) {
-        WinCraft.Toast.show('Could not save win. Please try again.', 'error');
+        WinCraft.Toast.show(`Save failed: ${err.message}`, 'error');
       } finally {
         btnSave.disabled = false;
         btnSave.innerHTML = 'Save My Win!';
