@@ -32,13 +32,9 @@ window.WinCraft.Auth = (() => {
       location.reload();
     });
 
-    // On custom domains, auto-detection fails — point explicitly to the Netlify Identity endpoint.
-    // On *.netlify.app URLs (production and deploy previews), let the widget detect it.
-    const onCustomDomain = !window.location.hostname.endsWith('.netlify.app');
-    netlifyIdentity.init(onCustomDomain
-      ? { APIUrl: 'https://gleeful-puffpuff-8beac5.netlify.app/.netlify/identity' }
-      : {}
-    );
+    netlifyIdentity.init({
+      APIUrl: 'https://gleeful-puffpuff-8beac5.netlify.app/.netlify/identity',
+    });
   }
 
   return { init, getToken, getCurrentUser, logout };
