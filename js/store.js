@@ -27,6 +27,14 @@ window.WinCraft.Store = (() => {
     return WinCraft.API.addWin(text, tags);
   }
 
+  function archiveWin(id) {
+    return WinCraft.API.archiveWin(id);
+  }
+
+  function unarchiveWin(id) {
+    return WinCraft.API.unarchiveWin(id);
+  }
+
   function deleteWin(id) {
     return WinCraft.API.deleteWin(id);
   }
@@ -62,5 +70,5 @@ window.WinCraft.Store = (() => {
     _write(SETTINGS_KEY, settings);
   }
 
-  return { getWins, addWin, deleteWin, migrateLegacyWins, getSettings, saveSettings };
+  return { getWins, addWin, archiveWin, unarchiveWin, deleteWin, migrateLegacyWins, getSettings, saveSettings };
 })();

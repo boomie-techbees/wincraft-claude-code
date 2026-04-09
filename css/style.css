@@ -379,6 +379,38 @@ textarea {
   background: var(--color-danger-light);
 }
 
+.btn-archive {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: var(--font-stack);
+}
+
+.btn-archive:hover {
+  color: var(--color-primary);
+  background: var(--color-primary-light, rgba(99, 102, 241, 0.1));
+}
+
+.btn-restore {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: var(--font-stack);
+}
+
+.btn-restore:hover {
+  color: var(--color-success, #16a34a);
+  background: var(--color-success-light, rgba(22, 163, 74, 0.1));
+}
+
 /* ===== Output Tabs ===== */
 .output-tabs {
   display: flex;
