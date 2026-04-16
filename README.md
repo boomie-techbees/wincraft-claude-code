@@ -4,7 +4,9 @@
 
 WinCraft is a personal achievement tracker that helps you record your wins, generate AI-powered summaries, and turn your accomplishments into polished resume bullets.
 
-🌐 **Live site:** https://techbees.me/wincraft-app
+🌐 **Live site:** https://gleeful-puffpuff-8beac5.netlify.app
+
+> **Note:** This is the February 2026 snapshot of the Claude Code version, preserved for comparison with versions built in Bolt, Lovable, and Replit. Wins are stored in your browser's localStorage — no account required.
 
 ---
 
@@ -14,8 +16,6 @@ WinCraft is a personal achievement tracker that helps you record your wins, gene
 - **Grammar check** — AI-powered spelling and grammar suggestions before saving
 - **AI Summary** — Get an encouraging overview of your recent accomplishments
 - **Resume bullets** — Turn your wins into professional resume bullet points
-- **Multi-user auth** — Each user has a private account with their own data
-- **Google OAuth** — Sign in with Google or email/password
 
 ---
 
@@ -24,8 +24,7 @@ WinCraft is a personal achievement tracker that helps you record your wins, gene
 | Layer | Technology |
 |---|---|
 | Frontend | Vanilla JS (no framework), custom CSS |
-| Auth | Netlify Identity (GoTrue) |
-| Data storage | Netlify Blobs (per-user, server-side) |
+| Data storage | localStorage (browser) |
 | AI features | Anthropic Claude API via Netlify Functions |
 | Hosting | Netlify |
 
@@ -43,11 +42,9 @@ npm install -g netlify-cli
 netlify login
 netlify link
 
-# Start local dev server with HTTPS tunnel (required for Netlify Identity)
-netlify dev --live
+# Start local dev server
+netlify dev
 ```
-
-> **Note:** Use `netlify dev --live` instead of plain `netlify dev`. Netlify Identity requires HTTPS, which the `--live` flag provides via a tunnel.
 
 ---
 
@@ -69,10 +66,9 @@ wincraft-claude/
 ├── css/
 │   └── style.css                 # All styles
 ├── js/
-│   ├── auth.js                   # Netlify Identity wrapper
-│   ├── api.js                    # API client (wins CRUD + AI endpoints)
-│   ├── store.js                  # Data layer (wins via API, settings via localStorage)
-│   ├── app.js                    # SPA router, auth gate
+│   ├── api.js                    # API client (AI endpoints)
+│   ├── store.js                  # Data layer (localStorage)
+│   ├── app.js                    # SPA router
 │   ├── components/
 │   │   ├── nav.js                # Navigation
 │   │   ├── toast.js              # Toast notifications
@@ -80,34 +76,11 @@ wincraft-claude/
 │   └── pages/
 │       ├── entry.js              # New win form
 │       ├── output.js             # Wins list, AI summary, resume tabs
-│       └── settings.js           # User settings + sign out
+│       └── settings.js           # User settings
 ├── netlify/functions/
-│   ├── wins.mjs                  # Wins CRUD API (Netlify Blobs)
+│   ├── wins.mjs                  # Wins CRUD API
 │   ├── grammar.mjs               # Grammar check (Claude API)
 │   ├── summary.mjs               # AI summary (Claude API)
 │   └── resume.mjs                # Resume bullets (Claude API)
-├── netlify.toml                  # Netlify build + redirect config
-└── package.json                  # Dependencies (@netlify/blobs)
+└── netlify.toml                  # Netlify build + redirect config
 ```
-
----
-
-## Branch & Deploy Workflow
-
-This project uses Netlify deploy previews for staging:
-
-1. Create a feature branch: `git checkout -b feat/my-feature`
-2. Make changes and commit
-3. Push: `git push origin feat/my-feature`
-4. Open a PR on GitHub — Netlify auto-generates a **deploy preview URL** in the PR checks
-5. Test on the preview URL
-6. Merge to `main` → auto-deploys to production
-
----
-
-## Pending / Upcoming Features
-
-- [ ] Custom Google OAuth credentials (so users see "WinCraft" on the consent screen, not "Netlify Identity")
-- [ ] Win editing
-- [ ] Filter/search wins by tag
-- [ ] Date range filtering for AI summary and resume bullets
